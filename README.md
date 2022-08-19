@@ -1,7 +1,7 @@
 # CleanVsCode
 
 [English | [简体中文](language/zh/)]
-
+ 
 Clean VisualStudio Code's Cache, which could be even more than 5G after 1 week's usage.
 
 **Why is the lightweight vscode uses more and more memory? Why does it occupy 10G of my C disk? How to clean the vscode cache painlessly? Tell you how to slim down for C disk hand in hand**
