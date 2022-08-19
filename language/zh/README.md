@@ -1,8 +1,8 @@
 # CleanVsCode
 
-[English | [简体中文](language/zh/)]
+[[English](/) |简体中文]
 
-Clean VisualStudio Code's Cache, which could be even more than 5G after 1 week's usage.
+清理VsCode缓存。甚至能清理5G缓存，哪怕只使用了1周。
 
 ## 轻量级的VsCode为何越用越大？为什么吃了我C盘10G？如何无痛清理VsCode缓存？手把手教你为C盘瘦身
 
