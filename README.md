@@ -4,56 +4,55 @@
 
 Clean VisualStudio Code's Cache, which could be even more than 5G after 1 week's usage.
 
-## 轻量级的VsCode为何越用越大？为什么吃了我C盘10G？如何无痛清理VsCode缓存？手把手教你为C盘瘦身
+**Why is the lightweight vscode uses more and more memory? Why does it occupy 10G of my C disk? How to clean the vscode cache painlessly? Tell you how to slim down for C disk hand in hand**
 
-VsCode是一款**轻量级**代码编辑器
+VsCode is a **lightweight** editor
 
-可用一段就会很快发现，“轻量级”的VsCode并不轻量
+But you will soon find that the "lightweight" vscode is not lightweight.
 
-不统计不知道，一统计吓一跳，使用了一段时间后，VsCode占用了我C盘10G+的空间！
+I was shocked by statistics before which I don't know about. After using for a period of time, vscode occupied 10G+ space of my C disk!
 
-好家伙，于是我决定治理一下VsCode，让VsCode变得真正的轻量级。
+Oh God, then I decided to manage vscode and make it really lightweight.
 
-### VsCode的空间占用分析
+### Space occupancy analysis of VsCode
 
-VsCode所占用的空间，主要包括四大部分（下面是我写此博客时统计的结果）：
+The space occupied by VsCode mainly includes four parts (the following is the statistical results when I wrote this blog):
 
-1. ```程序的安装目录```：大约会占用350M
-2. ```%userprofile%\.vscode```：可达800M。主要为：各个拓展。VsCode卸载拓展似乎不会删除硬盘上的文件，因此这个里面很大，并且混有很多不用的
-3. ```%userprofile%\AppData\Local\Microsoft\vscode-cpptools\ipch  ```：用一段时间能达到4G  与C(++)语言有关，关闭程序后可以直接删。不使用VsCode编辑C/C++的用户可能无此痛苦
-4. ```%userprofile%\AppData\Roaming\Code```：2G+  存放用户数据、配置等。  （可以通过启动时添加--user-data-dir NewDir  来使其他目录作为配置）
+1. ```Installation directory of the program```: about 350M
+2. ```%userprofile%\.vscode```：up to 800M. Mainly for: each expansion. The vscode uninstallation extension does not seem to delete the files on the hard disk, so it is very large and there are many unused files.
+3. ```%userprofile%\AppData\Local\Microsoft\vscode-cpptools\ipch  ```: 4G can be achieved in a period of time, which is related to the C(++) language. You can delete it directly after closing the program. Users who do not use vscode to edit C/C++ may not suffer from this.
+4. ```%userprofile%\AppData\Roaming\Code```: 2G+ stores user data, configuration, etc. (other directories can be configured by adding -- user data dir newdir when startup)
 
+Places that can be deleted regularly include ```3. ipch```(can be deleted completely) and ```4. Romaing```(cannot be deleted completely)
 
-可以定期删除的地方，有```3. ipch```（可完全删除） 和 ```4. Romaing```（不可完全删除）
+#### What can be deleted regularly in 4. romaing
 
-#### 4. Romaing中，到底哪些可以定期删除
-
-对```%userprofile%\AppData\Roaming\Code```中的文件进行更进一步地分析，我得到了如下结论：
+After further analysis of the files in```%userprofile%\AppData\Roaming\Code```, I got the following conclusions:
 
 ```
-%userprofile%\AppData\Roaming\Code\CachedExtensionVSIXs   用一段时间可以达到500M   可以直接删
-%userprofile%\AppData\Roaming\Code\Cache       很快几十M
-%userprofile%\AppData\Roaming\Code\CachedData  很快几十M
-%userprofile%\AppData\Roaming\Code\CachedExtensions  安装新插件时，似乎默认不会自动删除，安装插件一多能达到800M
-%userprofile%\AppData\Roaming\Code\CachedExtensionVSIXs 反正也是与插件有关的，也能达到几百M
-%userprofile%\AppData\Roaming\Code\Code Cache    十几M
-%userprofile%\AppData\Roaming\Code\Crashpad      十几M  用来存放崩溃信息
-%userprofile%\AppData\Roaming\Code\logs          几十M  这个可以直接删，用来存放日志记录
+%userprofile%\AppData\Roaming\Code\CachedExtensionVSIXs   It can reach 500M in a period of time.   Can be deleted directly
+%userprofile%\AppData\Roaming\Code\Cache       Soon, tens of M
+%userprofile%\AppData\Roaming\Code\CachedData  Soon, tens of M
+%userprofile%\AppData\Roaming\Code\CachedExtensions  When installing a new plug-in, it seems that it will not be automatically deleted by default. One or more plug-ins can reach 800M
+%userprofile%\AppData\Roaming\Code\CachedExtensionVSIXs Anyway, it is also related to plug-ins and can reach several hundred M
+%userprofile%\AppData\Roaming\Code\Code Cache    tens of M
+%userprofile%\AppData\Roaming\Code\Crashpad      dozen M  Used to store crash information
+%userprofile%\AppData\Roaming\Code\logs          tens of M  This can be deleted directly. used to store log records
 %userprofile%\AppData\Roaming\Code\Service Worker 1G    
-    %userprofile%\AppData\Roaming\Code\Service Worker\CacheStorage   1G  主要位于这里
+    %userprofile%\AppData\Roaming\Code\Service Worker\CacheStorage   1G  Mainly located here
     %userprofile%\AppData\Roaming\Code\Service Worker\ScriptCache    10M
 %userprofile%\AppData\Roaming\Code\User          600M
-    %userprofile%\AppData\Roaming\Code\User\workspaceStorage  500M  每打开一个工作目录就会在这个目录下生成一个文件夹
+    %userprofile%\AppData\Roaming\Code\User\workspaceStorage  500M  Each time you open a working directory, a folder will be generated under this directory
     %userprofile%\AppData\Roaming\Code\User\History           100M
-            每Ctrl+S(仅限有修改的成功的重新保存)一次就会生成一个副本。
-            这个不是按git的思路只存放更改，而是整个文件全部Copy一份。
-            一个100多k的源码保存十次就是1M，对于习惯随手Ctrl+S的用户会占用较大的空间
-            但是，删除之后将会影响历史版本的还原。
-            其中，文件名采用了代码混淆技术，每个文件会生成一个文件夹，真正的文件名、各个文件对应文件保存时间都在每个文件夹下的entries.json中
-    %userprofile%\AppData\Roaming\Code\User\snippets    这个不能删，并且重装还得记得备份（如果没有自动还原的话）这个是用户自定义的代码片段
+            A copy will be generated every time Ctrl+S (only successful resave with modification).
+            This is not to store changes only according to the idea of GIT, but to copy the entire file.
+            A source code of more than 100 K is saved for ten times, which is 1m. For users who are used to Ctrl+S, it will occupy a large space.
+            However, the deletion will affect the restoration of the historical version.
+            Among them, the file name adopts the code confusion technology, and each file will generate a folder. The real file name and the corresponding file saving time of each file are all in the entries.json under each folder
+    %userprofile%\AppData\Roaming\Code\User\snippets    This cannot be deleted, and you must remember to back it up (if it is not automatically restored) when reinstalling. This is a user-defined code fragment
 ```
 
-### 能定时删除的目录
+### Directories that can be deleted regularly
 
 1. ```%userprofile%\AppData\Local\Microsoft\vscode-cpptools\ipch```
 2. ```%userprofile%\AppData\Roaming\Code\CachedExtensionVSIXs```
@@ -70,7 +69,7 @@ VsCode所占用的空间，主要包括四大部分（下面是我写此博客�
 13. ```%userprofile%\AppData\Roaming\Code\User\History```
 
 
-这么多文件夹总不可能手动地一个一个地删除，因此我写了一个脚本：
+It is impossible to manually delete so many folders one by one, so I wrote a script:
 
 ```bash
 @REM example:
@@ -107,23 +106,23 @@ goto end
 :end
 ```
 
-**只需要将这个脚本另存为CleanVsCode.bat，并定期双击运行一次，就能定期释放大量空间**
+**Just save this script as CleanVsCode.bat and double-click it to run it once regularly, which can release a lot of space regularly**
 
-当然，释放的空间直接取决于你的VsCode所产生的缓存大小，间接取决于你的VsCode的使用次数。
+Of course, the free space directly depends on the cache size generated by your VsCode, and indirectly depends on the number of times your VsCode is used.
 
-最好关闭VsCode后再运行脚本。
+It will be better to close VsCode before running the script.
 
 ### ⚠️Warning
 
-运行脚本后再次运行VsCode基本上看不出什么不同，只是当前工作路径下所打开的文件需要重新手动点击打开。
+After running the script, running vscode again basically does not show any difference, except that the files opened under the current working path need to be manually opened again.
 
-毕竟是一个能删除很多东西的脚本，因此请谨慎使用。
+After all, it is a script that can delete many things, so please use it with caution.
 
-我作为本篇博客的原创博主，只是为大家提供了一个便捷的方法，但是其可能造成的后果，博主并不承担责任。
+As the original author of this small project, I only provide you with a convenient method, but the author is not responsible for the possible consequences.
 
-但是大家可以放心的是，我自己也在定期运行这个脚本。
+But you can rest assured that I am also running this script regularly.
 
-准备有空的时候将其加入Windows计划，以实现定期地自动释放空间。
+When you are ready to join the Windows plan, you can automatically release space on a regular basis.
 
 <!-- > 原创不易，转载请附上[原文链接](https://letmefly.blog.csdn.net/article/details/126082324)哦~ -->
 > My CSDN：[https://letmefly.blog.csdn.net/article/details/126082324](https://letmefly.blog.csdn.net/article/details/126082324)
