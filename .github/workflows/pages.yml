@@ -36,7 +36,7 @@ jobs:
         run: |
           pwd -P
           cp README.md ../..
-          cp language ../..
+          cp -r language ../..
       - name: Checkout website
         uses: actions/checkout@v3
         with:
@@ -46,7 +46,7 @@ jobs:
           pwd -P
           rm -rf READMD.md
           cp ../../README.md .
-          cp ../../language .
+          cp -r ../../language .
       - name: Setup pages
         uses: actions/configure-pages@v1
       - name: Build with Jekyll
